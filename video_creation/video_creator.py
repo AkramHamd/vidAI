@@ -4,6 +4,7 @@ from PIL import Image
 import os
 import random
 
+
 def camera_shake(clip, amplitude=5):
     """ Agrega un efecto de 'camera shake' al clip. """
     def fl(gf, t):
