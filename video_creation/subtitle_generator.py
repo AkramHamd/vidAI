@@ -1,4 +1,3 @@
-import os
 import ffmpeg
 from faster_whisper import WhisperModel
 from moviepy.editor import TextClip, CompositeVideoClip, VideoFileClip, ColorClip
@@ -59,8 +58,7 @@ def split_text_into_lines(
 def create_caption(
         textJSON, 
         framesize,
-        font = "Heavitas",
-        font_size=46,
+        font = "TeXGyreAdventor-Bold",
         color='white', 
         highlight_color='yellow',
         stroke_color='black',
@@ -74,7 +72,7 @@ def create_caption(
 
     x_pos = 0
     y_pos = 0
-    line_width = 0
+    line_width = 0  # Total width of words in the current line
     frame_width = framesize[0]
     frame_height = framesize[1]
 
@@ -82,22 +80,20 @@ def create_caption(
 
     max_line_width = frame_width - 2 * (x_buffer)
 
-    fontsize = int(frame_height * 0.09)
+    fontsize = int(frame_height * 0.09) #7.5 percent of video height
 
     space_width = ""
     space_height = ""
 
     for index,wordJSON in enumerate(textJSON['textcontents']):
       duration = wordJSON['end']-wordJSON['start']
-      word_clip = TextClip(wordJSON['word'], font=font, fontsize=font_size, 
-                     color=color, stroke_color=stroke_color, 
-                     stroke_width=stroke_width, bg_color='none')
+      word_clip = TextClip(wordJSON['word'],font = font,fontsize=fontsize, color=color, stroke_color=stroke_color,stroke_width=stroke_width, bg_color='none').set_start(textJSON['start']).set_duration(full_duration)
       word_clip_space = TextClip(" ", font = font,fontsize=fontsize, color=color, bg_color='none').set_start(textJSON['start']).set_duration(full_duration)
 
       word_width, word_height = word_clip.size
       space_width, space_height = word_clip_space.size
       if line_width + word_width+ space_width <= max_line_width:
-            
+            # Store info of each word_clip created
             xy_textclips_positions.append({
                 "x_pos":x_pos,
                 "y_pos": y_pos,
@@ -115,10 +111,12 @@ def create_caption(
             x_pos = x_pos + word_width+ space_width
             line_width = line_width+ word_width + space_width
       else:
+            # Move to the next line
             x_pos = 0
             y_pos = y_pos+ word_height+10
             line_width = word_width + space_width
 
+            # Store info of each word_clip created
             xy_textclips_positions.append({
                 "x_pos":x_pos,
                 "y_pos": y_pos,
@@ -134,8 +132,6 @@ def create_caption(
             word_clip_space = word_clip_space.set_position((x_pos+ word_width , y_pos))
             x_pos = word_width + space_width
 
-        
-
 
       word_clips.append(word_clip)
       word_clips.append(word_clip_space)
@@ -149,47 +145,72 @@ def create_caption(
 
     return word_clips,xy_textclips_positions
 
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_audio
 
-# ... [El resto de tu código, incluyendo las definiciones de las funciones] ...
+def add_subtitles(
+      videofilename ='temp_video.mp4',
+      outputfilename = 'output.mp4',
+      model_size = "base",
+      MaxChars = 10,
+      MaxDuration = 1.5,
+      MaxGap = 0.5,
+      font = './recursos/Heavitas.ttf'
+  ):
+      audiofilename = videofilename.replace(".mp4",'.mp3')
+      ffmpeg_extract_audio(videofilename, audiofilename)
 
-def add_subtitles(videofilename, outputfilename, model_size="base", MaxChars=10, MaxDuration=1.5, MaxGap=0.5, font="recursos/Heavitas.ttf", subtitle_position="bottom", font_size=46, font_color="white", stroke_color="black", stroke_width=1):
-    # Convertir video a audio para transcripción
-    audiofilename = videofilename.replace(".mp4", '.mp3')
-    ffmpeg.input(videofilename).audio.output(audiofilename).overwrite_output().run()
+      model = WhisperModel(model_size)
 
-    model = WhisperModel(model_size)
-    segments_gen, info = model.transcribe(audiofilename, word_timestamps=True)
-    segments = list(segments_gen)  # Convierte el generador a una lista
+      segments, info = model.transcribe(audiofilename, word_timestamps=True)
+      segments = list(segments)
 
-    input_video = VideoFileClip(videofilename)
-    all_subtitles = []
+      wordlevel_info = []
+      for segment in segments:
+          for word in segment.words:
+              wordlevel_info.append({'word':word.word,'start':word.start,'end':word.end})
 
-    # Procesar solo el primer segmento para simplificar
-    segment = segments[0]
-    for word in segment.words:
-        print(f"Word: {word.word}, Start: {word.start}, End: {word.end}")
-        subtitle = TextClip(word.word, font=font, fontsize=font_size, color=font_color, stroke_color=stroke_color, stroke_width=stroke_width, bg_color='none')
-        subtitle = subtitle.set_position(("center", "center")).set_start(word.start).set_end(word.end)  # Posición en la parte inferior central
-        all_subtitles.append(subtitle)
+      linelevel_subtitles = split_text_into_lines(data = wordlevel_info, MaxChars = MaxChars, MaxDuration = MaxDuration, MaxGap = MaxGap)
 
-    final_video_with_subtitles = CompositeVideoClip([input_video] + all_subtitles, size=input_video.size).set_duration(input_video.duration)
-    final_video_with_subtitles.write_videofile(outputfilename, codec="libx264")
+      input_video = VideoFileClip(videofilename)
+      frame_size = input_video.size
 
-    if os.path.exists(audiofilename):
-        os.remove(audiofilename)
+      all_linelevel_splits=[]
 
-    return outputfilename
+      for line in linelevel_subtitles:
+        out_clips,positions = create_caption(textJSON = line, framesize = frame_size, font = font)
+        max_width = 0
+        max_height = 0
+
+        for position in positions:
+          x_pos, y_pos = position['x_pos'],position['y_pos']
+          width, height = position['width'],position['height']
+
+          max_width = max(max_width, x_pos + width)
+          max_height = max(max_height, y_pos + height)
+
+        color_clip = ColorClip(size=(int(max_width*1.1), int(max_height*1.1)),
+                            color=(0, 0, 0))
+        color_clip = color_clip.set_opacity(0)
+        color_clip = color_clip.set_start(line['start']).set_duration(line['end']-line['start'])
+
+        centered_clips = [each.set_position('center') for each in out_clips]
+
+        clip_to_overlay = CompositeVideoClip([color_clip]+ out_clips)
+        clip_to_overlay = clip_to_overlay.set_position("center")
+
+        all_linelevel_splits.append(clip_to_overlay)
+
+      final_video = CompositeVideoClip([input_video] + all_linelevel_splits)
+
+      final_video = final_video.set_audio(input_video.audio)
+
+      final_video.write_videofile(outputfilename, fps=30, codec="libx264", audio_codec="aac")
 
 
-temp_video_path = "temp_video.mp4"
-output_path = "final_video_sub.mp4"
+      # final_video = CompositeVideoClip([input_video] + all_linelevel_splits)
 
-# Añadir subtítulos al video
-add_subtitles(videofilename=temp_video_path, outputfilename=output_path)
+      # final_video = final_video.set_audio(input_video.audio)
 
-# Cargar el video para obtener su duración
-video_clip = VideoFileClip(temp_video_path)
-print(f"Video duration: {video_clip.duration} seconds")
+      # final_video.write_videofile(outputfilename, fps=30, codec="libx264", audio_codec="aac")
 
-# No olvides cerrar el clip para liberar recursos
-video_clip.close()
+add_subtitles()
