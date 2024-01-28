@@ -4,7 +4,7 @@ import cv2
 from PIL import Image
 import os
 import random
-
+from subtitle_generator import add_subtitles
 
 
 def camera_shake(clip, initial_zoom=1.05, max_amplitude=5, frequency=0.5):
@@ -60,38 +60,38 @@ def resize_images(image_paths, output_dir, target_size):
 
 
 def create_video(image_paths, audio_path, particle_overlay, output_path="final_video.mp4"):
+    # Redimensionar imágenes
     resized_image_paths = resize_images(image_paths, './temp_resized_images/', (1920, 1080))
 
+    # Calcular duración para cada imagen basado en la duración del audio
     audio = AudioFileClip(audio_path)
-    audio_duration = audio.duration  # Obtener la duración del audio
-
-    # Calcular la duración de cada imagen
+    audio_duration = audio.duration
     image_duration = audio_duration / len(resized_image_paths)
 
-    # Crear un clip para cada imagen con la duración calculada y luego concatenarlos
+    # Crear clips para cada imagen y concatenarlos
     clips = [ImageClip(img_path, duration=image_duration) for img_path in resized_image_paths]
     final_clip = concatenate_videoclips(clips, method="compose")
 
-    final_clip = final_clip.set_audio(audio)
-    final_clip.fps = 24  # Establecer fps para el clip final
-
+    # Configurar audio y aplicar efectos al video
+    final_clip = final_clip.set_audio(audio).set_fps(24)
     final_clip = camera_shake(final_clip)
-    #final_clip = add_particle_overlay(final_clip, particle_overlay)  # Descomentar si se desea usar
 
-    final_clip.write_videofile(output_path, codec="libx264")
+    # Guardar el video temporal sin subtítulos
+    temp_video_path = "temp_video.mp4"
+    final_clip.write_videofile(temp_video_path, codec="libx264")
 
-# ... Resto de tu código ...
+    # Añadir subtítulos al video temporal y guardar el video final
+    final_video_with_subtitles = add_subtitles(
+        videofilename=temp_video_path, 
+        outputfilename=output_path
+    )
 
-# Configuraciones
-numero_de_imagenes = 20  # Ajusta este número al total de imágenes que tienes
-directorio_imagenes = './temp_resized_images/'  # Asegúrate de que la ruta sea correcta
 
-# Generar rutas de imagen
+# Configuraciones y llamada a la función create_video
+numero_de_imagenes = 20
+directorio_imagenes = './temp_resized_images/'
 image_paths = [f'{directorio_imagenes}image_{i}.jpg' for i in range(numero_de_imagenes)]
-
-# Rutas para el audio y el overlay de partículas
 audio_path = './videos/voiceover.mp3'
 particle_overlay = './recursos/particle_overlay.mp4'
 
-# Llamar a la función con las rutas generadas
 create_video(image_paths, audio_path, particle_overlay)
