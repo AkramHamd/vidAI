@@ -204,7 +204,7 @@ def add_subtitles(
 
       final_video = final_video.set_audio(input_video.audio)
 
-      final_video.write_videofile(outputfilename, fps=30, codec="libx264", audio_codec="aac")
+      final_video.write_videofile(outputfilename, fps=30, codec="libx264", audio_codec="libmp3lame")
 
 
       # final_video = CompositeVideoClip([input_video] + all_linelevel_splits)
