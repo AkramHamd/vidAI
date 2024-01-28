@@ -60,7 +60,7 @@ def create_caption(
         textJSON, 
         framesize,
         font = "Heavitas",
-        font_size=24,
+        font_size=46,
         color='white', 
         highlight_color='yellow',
         stroke_color='black',
@@ -134,6 +134,8 @@ def create_caption(
             word_clip_space = word_clip_space.set_position((x_pos+ word_width , y_pos))
             x_pos = word_width + space_width
 
+        
+
 
       word_clips.append(word_clip)
       word_clips.append(word_clip_space)
@@ -147,73 +149,47 @@ def create_caption(
 
     return word_clips,xy_textclips_positions
 
-def add_subtitles(
-    videofilename,
-    outputfilename,
-    model_size="base",
-    MaxChars=10,
-    MaxDuration=1.5,
-    MaxGap=0.5,
-    font="recursos\Heavitas.ttf",
-    subtitle_position="bottom",
-    font_size=24,
-    font_color="white",
-    stroke_color="black",
-    stroke_width=1
-):
+
+# ... [El resto de tu código, incluyendo las definiciones de las funciones] ...
+
+def add_subtitles(videofilename, outputfilename, model_size="base", MaxChars=10, MaxDuration=1.5, MaxGap=0.5, font="recursos/Heavitas.ttf", subtitle_position="bottom", font_size=46, font_color="white", stroke_color="black", stroke_width=1):
     # Convertir video a audio para transcripción
     audiofilename = videofilename.replace(".mp4", '.mp3')
-    input_stream = ffmpeg.input(videofilename)
-    audio = input_stream.audio
-    output_stream = ffmpeg.output(audio, audiofilename)
-    ffmpeg.overwrite_output(output_stream).run()
+    ffmpeg.input(videofilename).audio.output(audiofilename).overwrite_output().run()
 
     model = WhisperModel(model_size)
-    segments, info = model.transcribe(audiofilename, word_timestamps=True)
-    segments = list(segments)
-
-    wordlevel_info = []
-    for segment in segments:
-        for word in segment.words:
-            wordlevel_info.append({'word': word.word, 'start': word.start, 'end': word.end})
-
-    linelevel_subtitles = split_text_into_lines(data=wordlevel_info, MaxChars=MaxChars, MaxDuration=MaxDuration, MaxGap=MaxGap)
+    segments_gen, info = model.transcribe(audiofilename, word_timestamps=True)
+    segments = list(segments_gen)  # Convierte el generador a una lista
 
     input_video = VideoFileClip(videofilename)
-    video_duration = input_video.duration
+    all_subtitles = []
 
-    frame_size = input_video.size
+    # Procesar solo el primer segmento para simplificar
+    segment = segments[0]
+    for word in segment.words:
+        print(f"Word: {word.word}, Start: {word.start}, End: {word.end}")
+        subtitle = TextClip(word.word, font=font, fontsize=font_size, color=font_color, stroke_color=stroke_color, stroke_width=stroke_width, bg_color='none')
+        subtitle = subtitle.set_position(("center", "center")).set_start(word.start).set_end(word.end)  # Posición en la parte inferior central
+        all_subtitles.append(subtitle)
 
-    all_linelevel_splits = []
-    for line in linelevel_subtitles:
-        out_clips, positions = create_caption(
-            textJSON=line, framesize=frame_size, font=font, 
-            font_size=font_size, color=font_color, 
-            stroke_color=stroke_color, stroke_width=stroke_width
-        )
-    
-        clip_to_overlay = CompositeVideoClip(out_clips)
-        if subtitle_position == "bottom":
-            clip_to_overlay = clip_to_overlay.set_position(("center", "bottom"))
-        elif subtitle_position == "top":
-            clip_to_overlay = clip_to_overlay.set_position(("center", "top"))
-        else:
-            clip_to_overlay = clip_to_overlay.set_position("center")
-
-        all_linelevel_splits.append(clip_to_overlay)
-
-    
-    # Crear CompositeVideoClip con subtítulos
-    final_video_with_subtitles = CompositeVideoClip([input_video] + all_linelevel_splits)
-    
-    # Establecer la duración del CompositeVideoClip
-    final_video_with_subtitles = final_video_with_subtitles.set_duration(video_duration)
-
+    final_video_with_subtitles = CompositeVideoClip([input_video] + all_subtitles, size=input_video.size).set_duration(input_video.duration)
     final_video_with_subtitles.write_videofile(outputfilename, codec="libx264")
 
     if os.path.exists(audiofilename):
         os.remove(audiofilename)
 
-    return outputfilename  # Retornar el nombre del archivo generado
+    return outputfilename
 
-#add_subtitles()
+
+temp_video_path = "temp_video.mp4"
+output_path = "final_video_sub.mp4"
+
+# Añadir subtítulos al video
+add_subtitles(videofilename=temp_video_path, outputfilename=output_path)
+
+# Cargar el video para obtener su duración
+video_clip = VideoFileClip(temp_video_path)
+print(f"Video duration: {video_clip.duration} seconds")
+
+# No olvides cerrar el clip para liberar recursos
+video_clip.close()
