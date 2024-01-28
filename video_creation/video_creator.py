@@ -6,34 +6,28 @@ import os
 import random
 
 
-def camera_shake(clip, amplitude=10, zoom_factor=1.15):
-    """ Agrega un efecto de 'camera shake' más fuerte al clip con zoom. """
+
+def camera_shake(clip, initial_zoom=1.05, max_amplitude=5, frequency=0.5):
+    """ Aplica un efecto de 'camera shake' suave al clip. """
 
     def fl(gf, t):
-        """ Función aplicada a cada frame para crear el efecto de temblor con zoom. """
         frame = gf(t)
 
-        # Aplicar Zoom
-        h, w = frame.shape[:2]
-        zoomed_frame = cv2.resize(frame, None, fx=zoom_factor, fy=zoom_factor, interpolation=cv2.INTER_LINEAR)
+        # Aplicar un zoom inicial suave
+        frame_zoomed = np.array(Image.fromarray(frame).resize([int(dim * initial_zoom) for dim in frame.shape[1::-1]], Image.LANCZOS))
 
-        # Calcular el centro del frame ampliado
-        center_x, center_y = int(w * zoom_factor / 2), int(h * zoom_factor / 2)
+        # Calcular un desplazamiento suave y menos pronunciado
+        amplitude = max_amplitude * np.sin(frequency * t)
+        dx = int(amplitude * np.cos(2 * np.pi * frequency * t))
+        dy = int(amplitude * np.sin(2 * np.pi * frequency * t))
 
-        # Calcular desplazamiento con mayor amplitud
-        dx = int(amplitude * np.sin(2 * np.pi * t * 0.5))  # Frecuencia ajustable
-        dy = int(amplitude * np.cos(2 * np.pi * t * 0.5))
+        # Desplazar el frame de forma suave
+        frame_shaken = np.roll(np.roll(frame_zoomed, dy, axis=0), dx, axis=1)
 
-        # Calcular el punto de inicio para el recorte
-        start_x = center_x - w // 2 + dx
-        start_y = center_y - h // 2 + dy
-
-        # Recortar el frame ampliado para mantener el tamaño original
-        cropped_frame = zoomed_frame[start_y:start_y + h, start_x:start_x + w]
-
-        return cropped_frame
+        return frame_shaken
 
     return clip.fl(fl)
+
 
 def add_particle_overlay(clip, overlay_path, opacidad=0.5):
     """ Añade un overlay de partículas al clip. """
