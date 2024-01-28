@@ -1,8 +1,10 @@
 import openai
 import requests
 import os
+import json
 from textwrap import wrap
 from dotenv import load_dotenv
+from PIL import Image
 
 # Cargar variables de entorno
 load_dotenv()
@@ -25,27 +27,54 @@ def generate_prompts_from_script(script, num_prompts, openai_api_key):
 
     return prompts
 
-def download_image(url, save_path):
+
+def download_and_resize_image(url, save_path, target_size=(1920, 1080)):
     response = requests.get(url)
     if response.status_code == 200:
         with open(save_path, 'wb') as file:
             file.write(response.content)
+        
+        img = Image.open(save_path)
+        img = img.resize(target_size, Image.LANCZOS)
+        img.save(save_path)
     else:
         raise Exception(f"Error al descargar la imagen: {response.status_code}")
+
 
 def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images"):
     if not os.path.exists(images_dir):
         os.makedirs(images_dir)
 
-    openai.api_key = openai_api_key
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {openai_api_key}'
+    }
+
     image_paths = []
-    print ("Generando imagenes...")
+    print("Generando imágenes...")
     for i, prompt in enumerate(prompts):
-        response = openai.Image.create(prompt=prompt, n=1)
-        image_url = response.data[0].url
-        image_path = os.path.join(images_dir, f"image_{i}.jpg")
-        download_image(image_url, image_path)
-        image_paths.append(image_path)
+        payload = {
+            "model": "dall-e-3",
+            "prompt": prompt,
+            "n": 1,
+            "size": "1792x1024"
+        }
+
+        response = requests.post('https://api.openai.com/v1/images/generations',
+                                 headers=headers, data=json.dumps(payload))
+        if response.status_code == 200:
+            image_url = response.json()['data'][0]['url']
+            image_path = os.path.join(images_dir, f"image_{i}.jpg")
+            download_and_resize_image(image_url, image_path)
+            image_paths.append(image_path)
+        else:
+            
+            if response.status_code != 200:
+                print(f"Error al generar la imagen: {response.status_code}")
+                print("Detalle del error:", response.text)  # Imprime el mensaje de error detallado
+                continue  # Continúa con el siguiente prompt
+
+            print(f"Error al generar la imagen: {response.status_code}")
 
     return image_paths
 
@@ -63,24 +92,24 @@ But mastering portrait photography is more than just technical skills. It's abou
 Whether you're a beginner or an experienced photographer, this video is packed with tips and tricks that will take your portrait game to the next level. Let us help you unlock your full potential as a portrait photographer and capture the beauty of every moment. Stay tuned and get ready to master the art of portrait photography!
 """
 
-# # Número de ideas que deseas generar
-# num_prompts = 5
+# Número de ideas que deseas generar
+num_prompts = 2
 
-# # Clave de API de OpenAI obtenida del archivo .env
-# openai_api_key = os.getenv("OPENAI_API_KEY")
+# Clave de API de OpenAI obtenida del archivo .env
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
-# # Genera las ideas para las imágenes basadas en el guion de voz en off
-# prompts = generate_prompts_from_script(script, num_prompts, openai_api_key)
+# Genera las ideas para las imágenes basadas en el guion de voz en off
+prompts = generate_prompts_from_script(script, num_prompts, openai_api_key)
 
-# with open("prompts.txt", "w") as file:
-#     for i, prompt in enumerate(prompts):
-#         file.write(f"Prompt {i + 1}:\n")
-#         file.write(prompt + "\n\n")
+with open("prompts.txt", "w") as file:
+    for i, prompt in enumerate(prompts):
+        file.write(f"Prompt {i + 1}:\n")
+        file.write(prompt + "\n\n")
 
-# # Descarga las imágenes relacionadas con las ideas generadas
-# image_paths = generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images")
+# Descarga las imágenes relacionadas con las ideas generadas
+image_paths = generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images")
 
-# # Imprime las rutas de las imágenes descargadas
-# print("Imágenes descargadas:")
-# for image_path in image_paths:
-#     print(image_path)
+# Imprime las rutas de las imágenes descargadas
+print("Imágenes descargadas:")
+for image_path in image_paths:
+    print(image_path)

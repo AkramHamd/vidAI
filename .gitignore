@@ -1,5 +1,5 @@
 .env
-./downloaded_images
-./temp_resized_images
+downloaded_images/
+temp_resized_images/
 ./venv/
 venv/
