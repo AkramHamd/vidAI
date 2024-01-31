@@ -4,3 +4,4 @@ temp_resized_images/
 ./venv/
 venv/
 .temp/
+credentials.json

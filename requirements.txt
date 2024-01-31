@@ -1,0 +1,14 @@
+faster_whisper==0.10.0
+ffmpeg==1.4
+ffmpeg_python==0.2.0
+google_api_python_client==2.115.0
+google_auth_oauthlib==1.2.0
+moviepy==1.0.3
+numpy==1.26.3
+openai==0.28.0
+opencv_python==4.9.0.80
+Pillow==10.2.0
+protobuf==4.25.2
+pydub==0.25.1
+python-dotenv==1.0.1
+Requests==2.31.0
