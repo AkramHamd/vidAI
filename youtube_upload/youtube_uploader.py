@@ -1,65 +1,63 @@
-# import os
-# from googleapiclient.discovery import build
-# from googleapiclient.http import MediaFileUpload
-# from google.oauth2.credentials import Credentials
-
-# def upload_video_to_youtube(video_file_path, title, description, category_id, keywords, privacy_status):
-#     # Cargar credenciales y crear un servicio de YouTube
-#     credentials = Credentials.from_authorized_user_file('credentials.json')
-#     youtube = build('youtube', 'v3', credentials=credentials)
-
-#     # Configurar los detalles del video
-#     body = {
-#         'snippet': {
-#             'title': title,
-#             'description': description,
-#             'tags': keywords,
-#             'categoryId': category_id
-#         },
-#         'status': {
-#             'privacyStatus': privacy_status
-#         }
-#     }
-
-#     # Subir el video
-#     media = MediaFileUpload(video_file_path, chunksize=-1, resumable=True, mimetype='video/*')
-#     request = youtube.videos().insert(part='snippet,status', body=body, media_body=media)
-#     response = request.execute()
-
-#     print(f"Video uploaded. Video ID: {response['id']}")
-
-# # Ejemplo de uso
-# upload_video_to_youtube(
-#     video_file_path='.temp/output.mp4',
-#     title='Test',
-#     description='Descripción del Video',
-#     category_id='22',  # Categoría en YouTube
-#     keywords=['keyword1', 'keyword2'],
-#     privacy_status='private'  # Puede ser 'public', 'private' o 'unlisted'
-# )
 from google_auth_oauthlib.flow import InstalledAppFlow
-from dotenv import load_dotenv
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+from google.auth.transport.requests import Request
 import os
+import pickle
 
-load_dotenv
+def get_authenticated_service():
+    credentials = None
+    # Ruta al archivo de credenciales almacenadas
+    pickle_file = 'token.pickle'
+    
+    if os.path.exists(pickle_file):
+        with open(pickle_file, 'rb') as token:
+            credentials = pickle.load(token)
+    
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            credentials.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'credentials.json',
+                scopes=['https://www.googleapis.com/auth/youtube.upload'])
+            credentials = flow.run_local_server(port=8080)
 
-# Reemplaza con tu propio ID de cliente y secreto del cliente
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+            
+            # Guardar las credenciales para la próxima ejecución
+            with open(pickle_file, 'wb') as token:
+                pickle.dump(credentials, token)
+                
+    return build('youtube', 'v3', credentials=credentials)
 
-# Flujo de autenticación OAuth
-flow = InstalledAppFlow.from_client_config({
-    "installed": {
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "redirect_uris": ["urn:ietf:wg:oauth:2.0:oob"],
-        "scopes": ["https://www.googleapis.com/auth/youtube.upload"]
+
+def upload_video_to_youtube(video_file_path, title, description, category_id, keywords, privacy_status):
+    youtube = get_authenticated_service()
+
+    body = {
+        'snippet': {
+            'title': title,
+            'description': description,
+            'tags': keywords,
+            'categoryId': category_id
+        },
+        'status': {
+            'privacyStatus': privacy_status
+        }
     }
-}, scopes=["https://www.googleapis.com/auth/youtube.upload"])
 
-# Ejecutar el flujo de autenticación local
-flow.run_local_server(port=8080)
+    media = MediaFileUpload(video_file_path, chunksize=-1, resumable=True, mimetype='video/*')
+    request = youtube.videos().insert(part='snippet,status', body=body, media_body=media)
+    response = request.execute()
 
-print("Refresh Token:", flow.credentials.refresh_token)
+    print(f"Video uploaded. Video ID: {response['id']}")
+
+# Ejemplo de uso
+upload_video_to_youtube(
+    video_file_path='.temp/output.mp4',
+    title='Test',
+    description='Descripción del Video',
+    category_id='22',  # Categoría en YouTube
+    keywords=['keyword1', 'keyword2'],
+    privacy_status='private'  # Puede ser 'public', 'private' o 'unlisted'
+)

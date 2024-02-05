@@ -79,37 +79,37 @@ def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images
     return image_paths
 
 
-# Define el guion de voz en off
-script = """
-Welcome to the world of portrait photography, where every shot is a unique opportunity to capture the essence and personality of your subject. It's a skill that requires both technical knowledge and creative vision, and with practice and dedication, you can master it.
+# # Define el guion de voz en off
+# script = """
+# Welcome to the world of portrait photography, where every shot is a unique opportunity to capture the essence and personality of your subject. It's a skill that requires both technical knowledge and creative vision, and with practice and dedication, you can master it.
 
-Are you tired of taking lackluster portraits that fail to truly capture the beauty and emotion of your subjects? Are you looking to elevate your photography game to the next level? Then this video is for you.
+# Are you tired of taking lackluster portraits that fail to truly capture the beauty and emotion of your subjects? Are you looking to elevate your photography game to the next level? Then this video is for you.
 
-We will guide you through the fundamentals of portrait photography, from choosing the right camera and lenses, to understanding lighting techniques and posing your subject. We'll teach you how to use composition and framing to tell a powerful story through your images.
+# We will guide you through the fundamentals of portrait photography, from choosing the right camera and lenses, to understanding lighting techniques and posing your subject. We'll teach you how to use composition and framing to tell a powerful story through your images.
 
-But mastering portrait photography is more than just technical skills. It's about connecting with your subject and creating a comfortable and collaborative environment. We'll show you how to build rapport with your subject and bring out their unique personality and authenticity in every shot.   
+# But mastering portrait photography is more than just technical skills. It's about connecting with your subject and creating a comfortable and collaborative environment. We'll show you how to build rapport with your subject and bring out their unique personality and authenticity in every shot.   
 
-Whether you're a beginner or an experienced photographer, this video is packed with tips and tricks that will take your portrait game to the next level. Let us help you unlock your full potential as a portrait photographer and capture the beauty of every moment. Stay tuned and get ready to master the art of portrait photography!
-"""
+# Whether you're a beginner or an experienced photographer, this video is packed with tips and tricks that will take your portrait game to the next level. Let us help you unlock your full potential as a portrait photographer and capture the beauty of every moment. Stay tuned and get ready to master the art of portrait photography!
+# """
 
-# Número de ideas que deseas generar
-num_prompts = 2
+# # Número de ideas que deseas generar
+# num_prompts = 2
 
-# Clave de API de OpenAI obtenida del archivo .env
-openai_api_key = os.getenv("OPENAI_API_KEY")
+# # Clave de API de OpenAI obtenida del archivo .env
+# openai_api_key = os.getenv("OPENAI_API_KEY")
 
-# Genera las ideas para las imágenes basadas en el guion de voz en off
-prompts = generate_prompts_from_script(script, num_prompts, openai_api_key)
+# # Genera las ideas para las imágenes basadas en el guion de voz en off
+# prompts = generate_prompts_from_script(script, num_prompts, openai_api_key)
 
-with open("prompts.txt", "w") as file:
-    for i, prompt in enumerate(prompts):
-        file.write(f"Prompt {i + 1}:\n")
-        file.write(prompt + "\n\n")
+# with open("prompts.txt", "w") as file:
+#     for i, prompt in enumerate(prompts):
+#         file.write(f"Prompt {i + 1}:\n")
+#         file.write(prompt + "\n\n")
 
-# Descarga las imágenes relacionadas con las ideas generadas
-image_paths = generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images")
+# # Descarga las imágenes relacionadas con las ideas generadas
+# image_paths = generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images")
 
-# Imprime las rutas de las imágenes descargadas
-print("Imágenes descargadas:")
-for image_path in image_paths:
-    print(image_path)
+# # Imprime las rutas de las imágenes descargadas
+# print("Imágenes descargadas:")
+# for image_path in image_paths:
+#     print(image_path)

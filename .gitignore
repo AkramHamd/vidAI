@@ -5,3 +5,4 @@ temp_resized_images/
 venv/
 .temp/
 credentials.json
+token.pickle
