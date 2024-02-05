@@ -15,7 +15,7 @@ def create_thumbnail(image_path, title, output_path="thumbnail.jpg"):
 
     # Define the font and text size
     font_path = "./recursos/Heavitas.ttf"  # Make sure the font path is correct
-    font_size = 54
+    font_size = 86
     font = ImageFont.truetype(font_path, font_size)
 
     # Calculate text dimensions
@@ -25,8 +25,24 @@ def create_thumbnail(image_path, title, output_path="thumbnail.jpg"):
     x_position = (base.width - text_width) / 2
     y_position = (base.height - text_height) / 2
 
-    # Apply text to the image
-    draw.text((x_position, y_position), title, fill="white", font=font)
+    # Shadow offset
+    shadow_offset = 5
+
+    # Shadow color
+    shadow_color = 'black'
+
+    # Text color
+    text_color = 'red'
+
+    # Draw shadow multiple times for a denser effect
+    for offset in range(1, shadow_offset):
+        draw.text((x_position + offset, y_position + offset), title, fill=shadow_color, font=font)
+        draw.text((x_position - offset, y_position + offset), title, fill=shadow_color, font=font)
+        draw.text((x_position + offset, y_position - offset), title, fill=shadow_color, font=font)
+        draw.text((x_position - offset, y_position - offset), title, fill=shadow_color, font=font)
+
+    # Then draw the text in red on top
+    draw.text((x_position, y_position), title, fill=text_color, font=font)
 
     # Convert the image to RGB before saving
     rgb_base = base.convert("RGB")
