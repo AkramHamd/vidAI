@@ -63,7 +63,7 @@ def generate_dalle_thumbnail(video_title, thumbnail_output_dir, openai_api_key, 
     prompt = f"A spooky thumbnail for the video titled: '{video_title}'"
 
     # Generate images using DALL-E 3
-    image_path = generate_dalle_images([prompt], openai_api_key, thumbnail_output_dir, num_prompts)
+    image_path = generate_dalle_images([prompt], openai_api_key, thumbnail_output_dir)
 
     # Return the path of the generated thumbnail
     return image_path

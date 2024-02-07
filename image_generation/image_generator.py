@@ -43,8 +43,7 @@ def download_and_resize_image(url, save_path, target_size=(1920, 1080)):
     else:
         raise Exception(f"Error al descargar la imagen: {response.status_code}")
 
-
-def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images", num_prompts=30):
+def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images"):
     if not os.path.exists(images_dir):
         os.makedirs(images_dir)
 
@@ -56,9 +55,6 @@ def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images
     image_paths = []
     print("Generando imágenes...")
     for i, prompt in enumerate(prompts):
-        if i >= num_prompts:  # Asegúrate de no exceder el número de prompts
-            break
-
         payload = {
             "model": "dall-e-3",
             "prompt": prompt,
@@ -75,15 +71,12 @@ def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images
             image_paths.append(image_path)
         else:
             print(f"Error al generar la imagen: {response.status_code}")
-            print("Detalle del error:", response.text)
-            # Considera si quieres detener el proceso o continuar con el siguiente prompt
-            break  # o `continue` si quieres seguir con el siguiente prompt
+            # No need to repeat the error handling here as it's already inside the loop
 
     return image_paths
 
 
-
 def generate_images(script, num_prompts, openai_api_key):
     prompts = generate_prompts_from_script(script, num_prompts, openai_api_key)
-    image_paths = generate_dalle_images(prompts, openai_api_key, num_prompts)
+    image_paths = generate_dalle_images(prompts, openai_api_key)
     return image_paths

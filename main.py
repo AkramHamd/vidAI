@@ -41,7 +41,7 @@ def main(niche):
 
 # # Paso 5: Crear el video sin subtítulos
     temp_video_path = generate_temp_video_path(video_title)
-    create_video(images, tts_files, temp_video_path)
+    create_video(images, tts_files, temp_video_path, temp_video_path)
 
     print("Video temporal creado.")
 
