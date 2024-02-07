@@ -60,7 +60,7 @@ def create_caption(
         framesize,
         font = "TeXGyreAdventor-Bold",
         color='white', 
-        highlight_color='yellow',
+        highlight_color='red',
         stroke_color='black',
         stroke_width=1.5
     ):
@@ -162,6 +162,7 @@ def add_subtitles(
       model = WhisperModel(model_size)
 
       segments, info = model.transcribe(audiofilename, word_timestamps=True)
+      print("Audio transcrito")
       segments = list(segments)
 
       wordlevel_info = []
@@ -175,7 +176,7 @@ def add_subtitles(
       frame_size = input_video.size
 
       all_linelevel_splits=[]
-
+      print ("Generando subtitulos")
       for line in linelevel_subtitles:
         out_clips,positions = create_caption(textJSON = line, framesize = frame_size, font = font)
         max_width = 0
@@ -200,11 +201,12 @@ def add_subtitles(
 
         all_linelevel_splits.append(clip_to_overlay)
 
+      print ("Componiendo clip final")
       final_video = CompositeVideoClip([input_video] + all_linelevel_splits)
 
       final_video = final_video.set_audio(input_video.audio)
-
-      final_video.write_videofile(outputfilename, fps=30, codec="libx264", audio_codec="libmp3lame")
+      print ("Codificando video")
+      final_video.write_videofile(outputfilename, fps=30, codec="libx264", audio_codec="libmp3lame", threads=2)
 
 
       # final_video = CompositeVideoClip([input_video] + all_linelevel_splits)

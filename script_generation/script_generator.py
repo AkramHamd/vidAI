@@ -8,7 +8,7 @@ load_dotenv()
 def generate_script(idea):
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    prompt = f"Create a compelling text for a video about {idea}. Don't include instructions or scenes, just include the voice-over. The text should be at least 1200 words long and include hooks to keep the audience engaged."
+    prompt = f"Create a compelling text for a video about {idea}. Don't include instructions or scenes, just include the story in plain text, avoid saying voice-over. The text should be at least 1200 words long and include hooks to keep the audience engaged."
 
     response = openai.Completion.create(
         engine="gpt-3.5-turbo-instruct",

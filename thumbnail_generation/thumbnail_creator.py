@@ -50,8 +50,8 @@ def create_thumbnail(image_path, title, output_path="thumbnail.jpg"):
     # Save the modified image
     rgb_base.save(output_path, "JPEG")
 
-# Example usage
-image_path = "./downloaded_images/image_0.jpg"
-video_title = "Your Video Title Here"
-output_path = "./.temp/thumbnail.jpg"
-create_thumbnail(image_path, video_title, output_path)
+# # Example usage
+# image_path = "./downloaded_images/image_0.jpg"
+# video_title = "Your Video Title Here"
+# output_path = "./.temp/thumbnail.jpg"
+# create_thumbnail(image_path, video_title, output_path)

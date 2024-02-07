@@ -1,4 +1,5 @@
 import subprocess
+import uuid
 import os
 from pydub import AudioSegment
 
@@ -6,16 +7,22 @@ def get_audio_duration(audio_path):
     audio = AudioSegment.from_file(audio_path)
     return len(audio) / 1000.0  # Duración en segundos
 
-def generate_voiceover(script, output_path="./videos/voiceover.mp3"):
+def generate_voiceover(script, output_dir="./.temp", voice_name="en-US-ChristopherNeural"):
+
+    voiceover_filename = f"voiceover_{uuid.uuid4()}.mp3"
+    output_path = f"{output_dir}/{voiceover_filename}"
     try:
-        # Ejecuta edge-tts con el comando especificado
-        subprocess.run(["edge-tts", "--text", script, "--write-media", output_path], check=True)
+        # Ejecuta edge-tts con el comando especificado, incluyendo la voz seleccionada
+        subprocess.run(["edge-tts", "--text", script, "--voice", voice_name, "--write-media", output_path], check=True)
 
         return output_path
     except subprocess.CalledProcessError as e:
         print(f"Error al ejecutar edgeTTS: {e}")
         return None
 
+
+   
+   
    
 if __name__ == "__main__":
     # Define el guion de voz en off
@@ -28,7 +35,10 @@ if __name__ == "__main__":
     """
 
     # Genera el voz en off
-    output_audio_path = "./videos/voiceover.mp3"
+    output_audio_path = "./.temp/voiceover.mp3"
+    
+
+    generate_voiceover(script, output_audio_path )
 
     if output_audio_path:
         print(f"Voz en off generada correctamente: {output_audio_path}")

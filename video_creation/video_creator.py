@@ -1,10 +1,11 @@
 from moviepy.editor import ImageSequenceClip, AudioFileClip, VideoFileClip, CompositeVideoClip, ImageClip, concatenate_videoclips
 import numpy as np
-import cv2
 from PIL import Image
+import uuid
 import os
-import random
-from subtitle_generator import add_subtitles
+#from subtitle_generator import add_subtitles
+from subtitles.subtitle_generator import add_subtitles
+
 
 
 def camera_shake(clip, initial_zoom=1.05, max_amplitude=5, frequency=0.5):
@@ -59,9 +60,10 @@ def resize_images(image_paths, output_dir, target_size):
 
 
 
-def create_video(image_paths, audio_path, particle_overlay, output_path="final_video.mp4"):
+def create_video(image_paths, audio_path, particle_overlay, output_path="./videos/final_video.mp4"):
     # Redimensionar imágenes
-    resized_image_paths = resize_images(image_paths, './temp_resized_images/', (1920, 1080))
+    #resized_image_paths = resize_images(image_paths, './temp_resized_images/', (1920, 1080))
+    resized_image_paths = "./downloaded_images/"
 
     # Calcular duración para cada imagen basado en la duración del audio
     audio = AudioFileClip(audio_path)
@@ -77,8 +79,10 @@ def create_video(image_paths, audio_path, particle_overlay, output_path="final_v
     final_clip = camera_shake(final_clip)
 
     # Guardar el video temporal sin subtítulos
-    temp_video_path = "temp_video.mp4"
-    final_clip.write_videofile(temp_video_path, codec="libx264")
+    unique_id = str(uuid.uuid4())
+    temp_video_path = f"./.temp/temp_video_{unique_id}.mp4"
+    
+    final_clip.write_videofile(temp_video_path, codec="libx264", threads=2)
 
     # Añadir subtítulos al video temporal y guardar el video final
     final_video_with_subtitles = add_subtitles(
@@ -87,11 +91,11 @@ def create_video(image_paths, audio_path, particle_overlay, output_path="final_v
     )
 
 
-# Configuraciones y llamada a la función create_video
-numero_de_imagenes = 20
-directorio_imagenes = './temp_resized_images/'
-image_paths = [f'{directorio_imagenes}image_{i}.jpg' for i in range(numero_de_imagenes)]
-audio_path = './videos/voiceover.mp3'
-particle_overlay = './recursos/particle_overlay.mp4'
+# # Configuraciones y llamada a la función create_video
+# numero_de_imagenes = 20
+# directorio_imagenes = './temp_resized_images/'
+# image_paths = [f'{directorio_imagenes}image_{i}.jpg' for i in range(numero_de_imagenes)]
+# audio_path = './videos/voiceover.mp3'
+# particle_overlay = './recursos/particle_overlay.mp4'
 
-create_video(image_paths, audio_path, particle_overlay)
+# create_video(image_paths, audio_path, particle_overlay)

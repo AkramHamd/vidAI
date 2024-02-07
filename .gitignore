@@ -1,6 +1,10 @@
 .env
 downloaded_images/
+./downloaded_images/
 temp_resized_images/
+./temp_resized_images/
+videos/
+./videos/
 ./venv/
 venv/
 .temp/

@@ -1,41 +1,70 @@
-import os
+
 from idea_generation.idea_generator import generate_and_choose_idea
 from script_generation.script_generator import generate_script
-from tts_generation.tts_generator import generate_voiceover, get_audio_duration
-from image_generation.image_generator import generate_dalle_images, generate_prompts_from_script
-from video_creation.video_creator import create_video
+from image_generation.image_generator import generate_images
+from tts_generation.tts_generator import generate_voiceover
+from video_creation.subtitle_generator import add_subtitles
+from video_creation.video_creator import add_subtitles, create_video
+from thumbnail_generation.thumbnail_creator import create_thumbnail
+from utils.utils import generate_temp_video_path
+import youtube_upload.youtube_uploader as youtube_uploader
+import os
 from dotenv import load_dotenv
 
-# Cargar variables de entorno
 load_dotenv()
 
-def main():
-    openai_api_key = os.getenv("OPENAI_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
-    # Fase 1: Generar Idea
-    niche = "history"  # Ejemplo de nicho
-    idea = generate_and_choose_idea(niche, openai_api_key)
-    print(f"Idea seleccionada: {idea}")
 
-    # Fase 2: Generar Guion
-    script = generate_script(idea, openai_api_key)
-    print("Guion generado")
+def main(niche):
+    # Paso 1: Generar ideas basadas en el nicho y seleccionar una como título
+    video_title = generate_and_choose_idea(niche)
+    print(f"Título del video (idea seleccionada): {video_title}")
 
-    # Fase 3: Generar Voz en Off
-    voiceover_path = generate_voiceover(script)
-    print(f"Voz en off generada en: {voiceover_path}")
+    # Paso 2: Generar el script para el video
+    script = generate_script(video_title)
+    print("Script generado.")
 
-    # Fase 4: Generar Imágenes
-    audio_duration = get_audio_duration(voiceover_path)  # Asegúrate de tener esta función definida
-    num_images = int(audio_duration / 3)
-    prompts = generate_prompts_from_script(script, num_images, openai_api_key)
-    image_paths = generate_dalle_images(prompts, openai_api_key)
-    print(f"{len(image_paths)} imágenes generadas")
+    # Paso 3: Generar imágenes para el video
+    num_prompts = 5
+    #images = generate_images(script, num_prompts, openai_api_key)
+    images = './downloaded_images'
+    print("Imágenes generadas.")
 
-    # Fase 5: Crear Video
-    particle_overlay_path = "path/to/particle_overlay.mp4"  # Asegúrate de tener un archivo de overlay
-    final_video_path = create_video(image_paths, voiceover_path, particle_overlay_path)
-    print(f"Video creado en: {final_video_path}")
+    # Paso 4: Generar TTS para el video
+    tts_files = generate_voiceover(script)
+    print("TTS generado.")
+
+    # Paso 5: Crear el video sin subtítulos
+    temp_video_path = generate_temp_video_path(video_title)
+    
+    create_video(images, tts_files, temp_video_path)
+    print("Video temporal creado.")
+
+    # # Paso 6: Añadir subtítulos al video
+    # final_video_path = ".temp/final_video_sub.mp4"
+    # add_subtitles(temp_video_path, final_video_path)
+    # print("Subtítulos añadidos al video.")
+
+    # # Paso 7: Generar la miniatura para el video
+    # thumbnail_path = ".temp/thumbnail.jpg"
+    # first_image_path = "./downloaded_images/image_0.jpg"
+    # create_thumbnail(first_image_path, video_title, thumbnail_path)
+    # print("Miniatura generada.")
+
+    # Paso 8: Subir el video a YouTube con el título de la idea
+    youtube_uploader.upload_video_to_youtube(
+        video_file_path=temp_video_path,
+        title=video_title,  # El título del video es la idea generada
+        description=f"Un video sobre: {video_title}",
+        category_id='22',  # Define la categoría apropiada
+        keywords=['keyword1', 'keyword2'],  # Define las palabras clave apropiadas
+        privacy_status='private',  # Puede ser 'public', 'private' o 'unlisted'
+        #thumbnail_path=thumbnail_path
+
+    )
+    print("Video subido a YouTube con éxito.")
 
 if __name__ == "__main__":
-    main()
+    niche = "Realistic horror stories"  # Define tu nicho
+    main(niche)
