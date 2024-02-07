@@ -70,13 +70,14 @@ def resize_images(image_paths, output_dir, target_size):
 
 
 
-def create_video(image_paths, audio_path, particle_overlay, output_path="./videos/final_video.mp4"):
+def create_video(image_paths, audio_path, particle_overlay, output_path):
+    
     # Redimensionar imágenes
-    #resized_image_paths = resize_images(image_paths, './temp_resized_images/', (1920, 1080))
+    resized_image_paths = resize_images(image_paths, './.temp/temp_resized_images/', (1920, 1080))
     
     
-    images_directory = './downloaded_images/'
-    resized_image_paths = list_image_files(images_directory)
+    #images_directory = './downloaded_images/'
+    #resized_image_paths = list_image_files(images_directory)
 
     # Calcular duración para cada imagen basado en la duración del audio
     audio = AudioFileClip(audio_path)
@@ -94,14 +95,23 @@ def create_video(image_paths, audio_path, particle_overlay, output_path="./video
     # Guardar el video temporal sin subtítulos
     unique_id = str(uuid.uuid4())
     temp_video_path = f"./.temp/temp_video_{unique_id}.mp4"
+    temp_audio_path = f"./.temp/temp_audio_{unique_id}.mp3"  # Ruta para el archivo de audio temporal
 
-    final_clip.write_videofile(temp_video_path, codec="libx264", threads=2)
+    # Escribe el video y especifica la ruta del archivo de audio temporal
+    final_clip.write_videofile(temp_video_path, codec="libx264", temp_audiofile=temp_audio_path, threads=2)
 
-    # # Añadir subtítulos al video temporal y guardar el video final
-    # final_video_with_subtitles = add_subtitles(
-    #     videofilename=temp_video_path, 
-    #     outputfilename=output_path
-    # )
+    # Limpieza: eliminar el archivo de audio temporal
+    if os.path.exists(temp_audio_path):
+        os.remove(temp_audio_path)
+
+    # Añadir subtítulos al video temporal y guardar el video final
+    #print("Añadiendo subtitulos al video")
+    #final_video_with_subtitles = add_subtitles(videofilename=temp_video_path, outputfilename=output_path)
+
+    # Limpieza: eliminar el video temporal sin subtítulos si ya no es necesario
+    if os.path.exists(temp_video_path):
+        os.remove(temp_video_path)
+
 
 
 # # Configuraciones y llamada a la función create_video

@@ -43,14 +43,14 @@ def upload_thumbnail(youtube, video_id, thumbnail_file_path):
 
     print(f"Thumbnail uploaded for video ID: {video_id}")
 
-def upload_video_to_youtube(video_file_path, thumbnail_file_path, title, description, category_id, keywords, privacy_status):
+def upload_video_to_youtube(video_file_path, title, description, category_id, keywords, privacy_status, thumbnail_file_path=None):
     youtube = get_authenticated_service()
 
     body = {
         'snippet': {
             'title': title,
             'description': description,
-            'tags': keywords,
+            'tags': keywords,  # Use the keywords list directly
             'categoryId': category_id
         },
         'status': {
@@ -66,9 +66,12 @@ def upload_video_to_youtube(video_file_path, thumbnail_file_path, title, descrip
     video_id = response_video['id']
     print(f"Video uploaded. Video ID: {video_id}")
 
-    # Subir la miniatura
-    #if thumbnail_file_path:
-     #   upload_thumbnail(youtube, video_id, thumbnail_file_path)
+    # Subir la miniatura, if provided
+    if thumbnail_file_path:
+        upload_thumbnail(youtube, video_id, thumbnail_file_path)
+
+
+
 
 # # Ejemplo de uso
 # upload_video_to_youtube(

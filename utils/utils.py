@@ -38,3 +38,27 @@ def list_image_files(directory):
                    for filename in os.listdir(directory) 
                    if os.path.splitext(filename)[1].lower() in image_extensions]
     return image_paths
+
+def read_script_from_file(file_path):
+    """
+    Reads the script content from a given text file.
+
+    Args:
+        file_path (str): The path to the text file containing the script.
+
+    Returns:
+        str: The content of the script.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"The file {file_path} does not exist.")
+        return None
+    except Exception as e:
+        print(f"An error occurred while reading the file: {e}")
+        return None
+
+# Example usage:
+# script_content = read_script_from_file('path/to/your/script.txt')
+# print(script_content)

@@ -1,4 +1,8 @@
 from PIL import Image, ImageDraw, ImageFont
+import os
+import requests
+import json
+from image_generation.image_generator import *
 
 def textsize(text, font):
     im = Image.new(mode="P", size=(0, 0))
@@ -49,6 +53,22 @@ def create_thumbnail(image_path, title, output_path="thumbnail.jpg"):
 
     # Save the modified image
     rgb_base.save(output_path, "JPEG")
+
+def generate_dalle_thumbnail(video_title, thumbnail_output_dir, openai_api_key, num_prompts=1):
+    # Ensure the output directory exists
+    if not os.path.exists(thumbnail_output_dir):
+        os.makedirs(thumbnail_output_dir)
+
+    # Define the prompt based on the video title
+    prompt = f"A spooky thumbnail for the video titled: '{video_title}'"
+
+    # Generate images using DALL-E 3
+    image_path = generate_dalle_images([prompt], openai_api_key, thumbnail_output_dir, num_prompts)
+
+    # Return the path of the generated thumbnail
+    return image_path
+
+
 
 # # Example usage
 # image_path = "./downloaded_images/image_0.jpg"

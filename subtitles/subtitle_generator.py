@@ -60,7 +60,7 @@ def create_caption(
         framesize,
         font = "TeXGyreAdventor-Bold",
         color='white', 
-        highlight_color='yellow',
+        highlight_color='red',
         stroke_color='black',
         stroke_width=1.5
     ):

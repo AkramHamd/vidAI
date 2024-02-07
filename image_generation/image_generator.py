@@ -1,3 +1,4 @@
+#image_generator.py
 import openai
 import requests
 import os
@@ -10,13 +11,15 @@ from PIL import Image
 load_dotenv()
 
 def generate_prompts_from_script(script, num_prompts, openai_api_key):
-    words_per_prompt = len(script.split()) // num_prompts
-    wrapped_script = wrap(script, words_per_prompt)
+    #words_per_prompt = len(script.split()) // num_prompts
+    #wrapped_script = wrap(script, words_per_prompt)
 
+    script_parts = wrap(script, len(script) // num_prompts)
+    
     openai.api_key = openai_api_key
     prompts = []
     print("Generando prompts...")
-    for part in wrapped_script:
+    for part in script_parts:
         response = openai.Completion.create(
             engine="gpt-3.5-turbo-instruct",
             prompt=f"Generate a creative idea for an image that represents: '{part}', remember the niche is realistic horror stories",
@@ -41,7 +44,7 @@ def download_and_resize_image(url, save_path, target_size=(1920, 1080)):
         raise Exception(f"Error al descargar la imagen: {response.status_code}")
 
 
-def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images"):
+def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images", num_prompts=30):
     if not os.path.exists(images_dir):
         os.makedirs(images_dir)
 
@@ -53,6 +56,9 @@ def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images
     image_paths = []
     print("Generando imágenes...")
     for i, prompt in enumerate(prompts):
+        if i >= num_prompts:  # Asegúrate de no exceder el número de prompts
+            break
+
         payload = {
             "model": "dall-e-3",
             "prompt": prompt,
@@ -68,18 +74,16 @@ def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images
             download_and_resize_image(image_url, image_path)
             image_paths.append(image_path)
         else:
-            
-            if response.status_code != 200:
-                print(f"Error al generar la imagen: {response.status_code}")
-                print("Detalle del error:", response.text)  # Imprime el mensaje de error detallado
-                continue  # Continúa con el siguiente prompt
-
             print(f"Error al generar la imagen: {response.status_code}")
+            print("Detalle del error:", response.text)
+            # Considera si quieres detener el proceso o continuar con el siguiente prompt
+            break  # o `continue` si quieres seguir con el siguiente prompt
 
     return image_paths
 
 
+
 def generate_images(script, num_prompts, openai_api_key):
     prompts = generate_prompts_from_script(script, num_prompts, openai_api_key)
-    image_paths = generate_dalle_images(prompts, openai_api_key)
+    image_paths = generate_dalle_images(prompts, openai_api_key, num_prompts)
     return image_paths
