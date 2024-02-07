@@ -1,5 +1,6 @@
 import re
 import uuid
+import os
 
 def sanitize_filename(filename):
     """
@@ -26,3 +27,14 @@ def generate_temp_video_path(title):
     unique_id = str(uuid.uuid4())
     temp_video_path = f"./.temp/{sanitized_title}_{unique_id}.mp4"
     return temp_video_path
+
+def list_image_files(directory):
+    """
+    Devuelve una lista de rutas a archivos de imagen en el directorio especificado.
+    Solo considera archivos con extensiones comunes de imagen.
+    """
+    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.bmp', '.webp']
+    image_paths = [os.path.join(directory, filename) 
+                   for filename in os.listdir(directory) 
+                   if os.path.splitext(filename)[1].lower() in image_extensions]
+    return image_paths

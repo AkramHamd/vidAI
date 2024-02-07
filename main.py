@@ -6,7 +6,7 @@ from tts_generation.tts_generator import generate_voiceover
 from video_creation.subtitle_generator import add_subtitles
 from video_creation.video_creator import add_subtitles, create_video
 from thumbnail_generation.thumbnail_creator import create_thumbnail
-from utils.utils import generate_temp_video_path
+from utils.utils import generate_temp_video_path, list_image_files
 import youtube_upload.youtube_uploader as youtube_uploader
 import os
 from dotenv import load_dotenv
@@ -28,7 +28,10 @@ def main(niche):
     # Paso 3: Generar imágenes para el video
     num_prompts = 5
     #images = generate_images(script, num_prompts, openai_api_key)
-    images = './downloaded_images'
+    #images = './temp_resized_images/'
+    
+    images_directory = './downloaded_images/'
+    images = list_image_files(images_directory)
     print("Imágenes generadas.")
 
     # Paso 4: Generar TTS para el video
@@ -37,14 +40,14 @@ def main(niche):
 
     # Paso 5: Crear el video sin subtítulos
     temp_video_path = generate_temp_video_path(video_title)
-    
+
     create_video(images, tts_files, temp_video_path)
     print("Video temporal creado.")
 
-    # # Paso 6: Añadir subtítulos al video
-    # final_video_path = ".temp/final_video_sub.mp4"
-    # add_subtitles(temp_video_path, final_video_path)
-    # print("Subtítulos añadidos al video.")
+    # Paso 6: Añadir subtítulos al video
+    final_video_path = f"./videos/{video_title}.mp4"
+    add_subtitles(temp_video_path, final_video_path)
+    print("Subtítulos añadidos al video.")
 
     # # Paso 7: Generar la miniatura para el video
     # thumbnail_path = ".temp/thumbnail.jpg"

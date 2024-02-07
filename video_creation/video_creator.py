@@ -7,6 +7,16 @@ import os
 from subtitles.subtitle_generator import add_subtitles
 
 
+def list_image_files(directory):
+    """
+    Devuelve una lista de rutas a archivos de imagen en el directorio especificado.
+    Solo considera archivos con extensiones comunes de imagen.
+    """
+    image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.tiff', '.bmp', '.webp']
+    image_paths = [os.path.join(directory, filename) 
+                   for filename in os.listdir(directory) 
+                   if os.path.splitext(filename)[1].lower() in image_extensions]
+    return image_paths
 
 def camera_shake(clip, initial_zoom=1.05, max_amplitude=5, frequency=0.5):
     """ Aplica un efecto de 'camera shake' suave al clip. """
@@ -63,7 +73,10 @@ def resize_images(image_paths, output_dir, target_size):
 def create_video(image_paths, audio_path, particle_overlay, output_path="./videos/final_video.mp4"):
     # Redimensionar imágenes
     #resized_image_paths = resize_images(image_paths, './temp_resized_images/', (1920, 1080))
-    resized_image_paths = "./downloaded_images/"
+    
+    
+    images_directory = './downloaded_images/'
+    resized_image_paths = list_image_files(images_directory)
 
     # Calcular duración para cada imagen basado en la duración del audio
     audio = AudioFileClip(audio_path)
@@ -81,14 +94,14 @@ def create_video(image_paths, audio_path, particle_overlay, output_path="./video
     # Guardar el video temporal sin subtítulos
     unique_id = str(uuid.uuid4())
     temp_video_path = f"./.temp/temp_video_{unique_id}.mp4"
-    
+
     final_clip.write_videofile(temp_video_path, codec="libx264", threads=2)
 
-    # Añadir subtítulos al video temporal y guardar el video final
-    final_video_with_subtitles = add_subtitles(
-        videofilename=temp_video_path, 
-        outputfilename=output_path
-    )
+    # # Añadir subtítulos al video temporal y guardar el video final
+    # final_video_with_subtitles = add_subtitles(
+    #     videofilename=temp_video_path, 
+    #     outputfilename=output_path
+    # )
 
 
 # # Configuraciones y llamada a la función create_video

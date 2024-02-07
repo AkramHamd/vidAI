@@ -7,6 +7,9 @@ videos/
 ./videos/
 ./venv/
 venv/
+scripts/
+./scripts
+./scripts/
 .temp/
 credentials.json
 token.pickle
