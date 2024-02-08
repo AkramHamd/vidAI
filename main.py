@@ -27,10 +27,9 @@ def main(niche):
     print("Script generado.")
 
     # # Paso 3: Generar imágenes para el video
-    num_prompts = 10
+    num_prompts = 3
     images = generate_images(script, num_prompts, openai_api_key)
 
-    
     # images_directory = './downloaded_images/'
     # images = list_image_files(images_directory)
     print("Imágenes generadas.")
@@ -41,7 +40,8 @@ def main(niche):
 
     # # Paso 5: Crear el video sin subtítulos
     unique_id = str(uuid.uuid4())
-    output_video_path = f"./videos/{video_title}_{unique_id}.mp4"
+    temp_video_title = sanitize_filename(video_title)
+    output_video_path = f"./videos/{temp_video_title}_{unique_id}.mp4"
 
     temp_video_path = generate_temp_video_path(video_title)
     create_video(images, tts_files, temp_video_path, output_video_path)

@@ -2,6 +2,8 @@ import re
 import uuid
 import os
 
+import re
+
 def sanitize_filename(filename):
     """
     Sanitize the filename by removing or replacing characters that are not allowed
@@ -10,6 +12,8 @@ def sanitize_filename(filename):
     """
     # Remove or replace invalid characters
     sanitized = re.sub(r'[<>:"/\\|?*\x00-\x1F]', '', filename)
+    # Replace single quotes with underscores
+    sanitized = sanitized.replace("'", "_")
     # Replace spaces with underscores
     sanitized = sanitized.replace(' ', '_')
     # Truncate to the first 100 characters to avoid long filenames
@@ -17,6 +21,7 @@ def sanitize_filename(filename):
     # Ensure the filename is not empty
     sanitized = sanitized if sanitized else "unnamed"
     return sanitized
+
 
 def generate_temp_video_path(title):
     """

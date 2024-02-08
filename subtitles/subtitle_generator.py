@@ -156,7 +156,8 @@ def add_subtitles(
       MaxGap = 0.5,
       font = './recursos/Heavitas.ttf'
   ):
-      audiofilename = videofilename.replace(".mp4",'.mp3')
+      #audiofilename = videofilename.replace(".mp4",'.mp3')
+      audiofilename = "temp_audio.mp3"
       ffmpeg_extract_audio(videofilename, audiofilename)
 
       model = WhisperModel(model_size)
