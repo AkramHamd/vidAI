@@ -9,7 +9,6 @@ from thumbnail_generation.thumbnail_creator import generate_dalle_thumbnail
 from utils.utils import *
 import youtube_upload.youtube_uploader as youtube_uploader
 import os
-import tiktok_upload.tiktok_uploader as tiktok_uploader
 from dotenv import load_dotenv
 
 load_dotenv()
