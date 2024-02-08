@@ -1,29 +1,32 @@
-import os
-from dotenv import load_dotenv
-from tiktok_uploader.upload import upload_video, upload_videos
+from tiktok_uploader.upload import upload_videos
 from tiktok_uploader.auth import AuthBackend
-# Asumiendo que ya has importado todos los otros módulos necesarios
+import os
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options
 
-# Importa tu módulo de TikTok
-#import tiktok_upload.tiktok_uploader as tiktok_uploader
-# Asume que esta es la ruta del video creado y una descripción para TikTok
-output_video_path = "./.temp/temp_video_3b96792d-c2e8-4b47-9722-271fa567cf79.mp4"
-video_title = "Horror"
-video_path_tiktok = output_video_path
-video_description_tiktok = f"A video about: {video_title}"
+def upload_clip_tiktok() -> None:
+    chrome_options = Options()
+    chrome_options.add_argument('--headless')  # Opcional, para ejecutar Chrome en modo headless
+    chrome_options.add_argument('--disable-gpu')  # Opcional, recomendado para modo headless
+    chrome_options.add_argument('--no-sandbox')  # Opcional, recomendado para ejecutar en contenedores Docker
+    service = ChromeService(ChromeDriverManager().install())
+    driver = webdriver.Chrome(options=chrome_options, service=service)
+    auth = AuthBackend(cookies="./tiktok_matrix_cookies.txt")  # Asegúrate de que el archivo de cookies exista y sea válido
 
-# Asume que tienes una función `upload_video_to_tiktok` adecuadamente configurada
-try:
-    # single video
-    upload_video('./.temp/temp_video_3b96792d-c2e8-4b47-9722-271fa567cf79.mp4',
-                description='this is my description',
-                cookies='./tiktok_matrix_cookies.txt', browser='firefox', headless=True)
+    videos = []
+    for video_clip in os.listdir("./.temp/"):  # Asegúrate de que esta es la ruta correcta a tus videos
+        if video_clip.endswith(".mp4"):  # Filtra solo archivos .mp4
+            new_video = {}
+            new_video["path"] = f"./.temp/{video_clip}"
+            # Aquí puedes personalizar la descripción de cada video
+            new_video["description"] = f"{video_clip} #yourhashtags #fyp #foryoupage"
+            videos.append(new_video)
 
-
-    #auth = AuthBackend(cookies='./tiktok_matrix_cookies.txt')    
-    print("Video subido a TikTok con éxito.")
-    
-except Exception as e:
-    print(f"Error al subir video a TikTok: {e}")
-
-    
+    upload_videos(videos=videos, 
+                  auth=auth, 
+                  browser="chrome", 
+                  browser_agent=driver)
+            
+upload_clip_tiktok()

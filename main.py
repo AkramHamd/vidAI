@@ -18,16 +18,16 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 
 def main(niche):
     
-#  Paso 1: Generar ideas basadas en el nicho y seleccionar una como título
+    #  Paso 1: Generar ideas basadas en el nicho y seleccionar una como título
     video_title = generate_and_choose_idea(niche)
     print(f"Título del video (idea seleccionada): {video_title}")
 
-# # Paso 2: Generar el script para el video
+    # # Paso 2: Generar el script para el video
     script = generate_script(video_title)
     print("Script generado.")
 
-# # Paso 3: Generar imágenes para el video
-    num_prompts = 2
+    # # Paso 3: Generar imágenes para el video
+    num_prompts = 10
     images = generate_images(script, num_prompts, openai_api_key)
 
     
@@ -35,11 +35,11 @@ def main(niche):
     # images = list_image_files(images_directory)
     print("Imágenes generadas.")
 
-# # Paso 4: Generar TTS para el video
+    # # Paso 4: Generar TTS para el video
     tts_files = generate_voiceover(script)
     print("TTS generado.")
 
-# # Paso 5: Crear el video sin subtítulos
+    # # Paso 5: Crear el video sin subtítulos
     unique_id = str(uuid.uuid4())
     output_video_path = f"./videos/{video_title}_{unique_id}.mp4"
 
@@ -48,12 +48,12 @@ def main(niche):
 
     print("Video temporal creado.")
 
-# # Paso 7: Generar la miniatura para el video
-#     thumbnail_path = generate_dalle_thumbnail(video_title, "./.temp/", openai_api_key, 1)
-#     #thumbnail_path = "./.temp/image_0.jpg"
-#     print("Miniatura generada.")
+    # # Paso 7: Generar la miniatura para el video
+    #     thumbnail_path = generate_dalle_thumbnail(video_title, "./.temp/", openai_api_key, 1)
+    #     #thumbnail_path = "./.temp/image_0.jpg"
+    #     print("Miniatura generada.")
 
-#    # Paso 8: Subir el video a YouTube con el título de la idea
+    #    # Paso 8: Subir el video a YouTube con el título de la idea
     youtube_uploader.upload_video_to_youtube(
     video_file_path=output_video_path,
     title=video_title,

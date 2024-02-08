@@ -157,7 +157,7 @@ def add_subtitles(
       font = './recursos/Heavitas.ttf'
   ):
       audiofilename = videofilename.replace(".mp4",'.mp3')
-      ffmpeg_extract_audio(videofilename, "./.temp/audio_{audiofilename}")
+      ffmpeg_extract_audio(videofilename, audiofilename)
 
       model = WhisperModel(model_size)
 
@@ -202,7 +202,7 @@ def add_subtitles(
 
       final_video = CompositeVideoClip([input_video] + all_linelevel_splits)
 
-      final_video = final_video.set_aufdio(input_video.audio)
+      final_video = final_video.set_audio(input_video.audio)
 
       final_video.write_videofile(outputfilename, fps=30, codec="libx264", audio_codec="libmp3lame")
 
@@ -213,4 +213,4 @@ def add_subtitles(
 
       # final_video.write_videofile(outputfilename, fps=30, codec="libx264", audio_codec="aac")
 
-add_subtitles("./.temp/temp_video_3b96792d-c2e8-4b47-9722-271fa567cf79.mp4", "./.temp/test.mp4")
+#add_subtitles("./.temp/temp_video_3b96792d-c2e8-4b47-9722-271fa567cf79.mp4", "./.temp/test.mp4")
