@@ -9,6 +9,7 @@ from thumbnail_generation.thumbnail_creator import generate_dalle_thumbnail
 from utils.utils import *
 import youtube_upload.youtube_uploader as youtube_uploader
 import os
+import tiktok_upload.tiktok_uploader as tiktok_uploader
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -40,27 +41,32 @@ def main(niche):
     print("TTS generado.")
 
 # # Paso 5: Crear el video sin subtítulos
+    unique_id = str(uuid.uuid4())
+    output_video_path = f"./videos/{video_title}_{unique_id}.mp4"
+
     temp_video_path = generate_temp_video_path(video_title)
-    create_video(images, tts_files, temp_video_path, temp_video_path)
+    create_video(images, tts_files, temp_video_path, output_video_path)
 
     print("Video temporal creado.")
 
-# Paso 7: Generar la miniatura para el video
-    thumbnail_path = generate_dalle_thumbnail(video_title, "./.temp/", openai_api_key, 1)
-    #thumbnail_path = "./.temp/image_0.jpg"
-    print("Miniatura generada.")
+# # Paso 7: Generar la miniatura para el video
+#     thumbnail_path = generate_dalle_thumbnail(video_title, "./.temp/", openai_api_key, 1)
+#     #thumbnail_path = "./.temp/image_0.jpg"
+#     print("Miniatura generada.")
 
 #    # Paso 8: Subir el video a YouTube con el título de la idea
     youtube_uploader.upload_video_to_youtube(
-    video_file_path=temp_video_path,
+    video_file_path=output_video_path,
     title=video_title,
     description=f"A video about: {video_title}",
     category_id='22',
     keywords=['horror', 'scary stories', 'ghost tales', 'haunted places', 'supernatural', 'creepy tales', 'urban legends', 'chilling narrations', 'spooky content', 'paranormal activity', 'dark tales', 'eerie experiences', 'frightful stories', 'spine-tingling adventures', 'macabre mysteries', 'fear-inducing tales', 'horror narration', 'bone-chilling stories', 'terrifying encounters', 'mysterious phenomena'],  # Define las palabras clave apropiadas
     privacy_status='public',
-    thumbnail_file_path=thumbnail_path  # Assuming thumbnail_path is defined elsewhere
+    #thumbnail_file_path=thumbnail_path  # Assuming thumbnail_path is defined elsewhere
     )
     print("Video subido a YouTube con éxito.")
+
+    
 
 if __name__ == "__main__":
     niche = "Realistic horror stories"  # Define tu nicho

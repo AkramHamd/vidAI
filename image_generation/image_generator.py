@@ -31,7 +31,7 @@ def generate_prompts_from_script(script, num_prompts, openai_api_key):
     return prompts
 
 
-def download_and_resize_image(url, save_path, target_size=(1920, 1080)):
+def download_and_resize_image(url, save_path, target_size=(1080, 1920)):
     response = requests.get(url)
     if response.status_code == 200:
         with open(save_path, 'wb') as file:
@@ -59,7 +59,7 @@ def generate_dalle_images(prompts, openai_api_key, images_dir="downloaded_images
             "model": "dall-e-3",
             "prompt": prompt,
             "n": 1,
-            "size": "1792x1024"
+            "size": "1024x1792"
         }
 
         response = requests.post('https://api.openai.com/v1/images/generations',

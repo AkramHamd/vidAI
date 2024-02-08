@@ -13,3 +13,7 @@ scripts/
 .temp/
 credentials.json
 token.pickle
+app.log
+*.log
+www.tiktok.com_cookies.txt
+tiktok_matrix_cookies.txt

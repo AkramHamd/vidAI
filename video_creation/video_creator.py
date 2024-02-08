@@ -73,7 +73,8 @@ def resize_images(image_paths, output_dir, target_size):
 def create_video(image_paths, audio_path, particle_overlay, output_path):
     
     # Redimensionar imágenes
-    resized_image_paths = resize_images(image_paths, './.temp/temp_resized_images/', (1920, 1080))
+    #resized_image_paths = resize_images(image_paths, './.temp/temp_resized_images/', (1920, 1080))
+    resized_image_paths = resize_images(image_paths, './.temp/temp_resized_images/', (1080, 1920))
     
     
     #images_directory = './downloaded_images/'
@@ -105,8 +106,8 @@ def create_video(image_paths, audio_path, particle_overlay, output_path):
         os.remove(temp_audio_path)
 
     # Añadir subtítulos al video temporal y guardar el video final
-    #print("Añadiendo subtitulos al video")
-    #final_video_with_subtitles = add_subtitles(videofilename=temp_video_path, outputfilename=output_path)
+    print("Añadiendo subtitulos al video")
+    final_video_with_subtitles = add_subtitles(videofilename=temp_video_path, outputfilename=output_path)
 
     # Limpieza: eliminar el video temporal sin subtítulos si ya no es necesario
     if os.path.exists(temp_video_path):
