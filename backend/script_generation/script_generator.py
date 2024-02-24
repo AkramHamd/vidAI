@@ -21,6 +21,7 @@ def generate_script(idea):
     
    # Limpiar el título para el nombre del archivo
     filename_safe_idea = sanitize_filename(idea)
+    
     script_path = f"./scripts/{filename_safe_idea}.txt"
 
     script_path = f"./scripts/{filename_safe_idea}.txt"

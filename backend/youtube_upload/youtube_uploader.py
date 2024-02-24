@@ -6,11 +6,8 @@ import os
 import pickle
 
 
-
-
 def get_authenticated_service():
     credentials = None
-    # Ruta al archivo de credenciales almacenadas
     pickle_file = 'token.pickle'
     
     if os.path.exists(pickle_file):
@@ -19,15 +16,17 @@ def get_authenticated_service():
     
     if not credentials or not credentials.valid:
         if credentials and credentials.expired and credentials.refresh_token:
-            credentials.refresh(Request())
-        else:
+            try:
+                credentials.refresh(Request())
+            except Exception as e:
+                print(f"Error al refrescar el token: {e}. Iniciando nuevo flujo de autenticación.")
+                credentials = None  # Forzar nuevo flujo de autenticación
+                
+        if not credentials:
             flow = InstalledAppFlow.from_client_secrets_file(
                 'credentials.json',
                 scopes=['https://www.googleapis.com/auth/youtube.upload'])
             credentials = flow.run_local_server(port=8080)
-
-            
-            # Guardar las credenciales para la próxima ejecución
             with open(pickle_file, 'wb') as token:
                 pickle.dump(credentials, token)
                 
@@ -71,17 +70,19 @@ def upload_video_to_youtube(video_file_path, title, description, category_id, ke
         upload_thumbnail(youtube, video_id, thumbnail_file_path)
 
 
-
+output_video_path="../videos/Exploring_a_Haunted_House_Thrilling_Scares_&_Chilling_Secrets_6078239f-0bfb-401f-9b67-f4a3ba0811ed.mp4"
+video_title="TEST"
 
 # # Ejemplo de uso
-# upload_video_to_youtube(
-#     video_file_path='.temp/output.mp4',
-#     thumbnail_file_path='.temp/thumbnail.jpg',
-#     title='Test',
-#     description='Descripción del Video',
-#     category_id='22',  # Categoría en YouTube
-#     keywords=['keyword1', 'keyword2'],
-#     privacy_status='private'  # Puede ser 'public', 'private' o 'unlisted'
-# )
+upload_video_to_youtube(
+    video_file_path=output_video_path,
+    title=video_title,
+    description=f"A video about: {video_title}",
+    category_id='22',
+    keywords=['horror', 'scary stories', 'ghost tales', 'haunted places', 'supernatural', 'creepy tales', 'urban legends', 'chilling narrations', 'spooky content', 'paranormal activity', 'dark tales', 'eerie experiences', 'frightful stories', 'spine-tingling adventures', 'macabre mysteries', 'fear-inducing tales', 'horror narration', 'bone-chilling stories', 'terrifying encounters', 'mysterious phenomena'],  # Define las palabras clave apropiadas
+    privacy_status='public',
+    #thumbnail_file_path=thumbnail_path  # Assuming thumbnail_path is defined elsewhere
+    )
+print("Video subido a YouTube con éxito.")
 
 

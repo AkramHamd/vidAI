@@ -5,8 +5,8 @@ temp_resized_images/
 ./temp_resized_images/
 videos/
 ./videos/
-./venv/
-venv/
+./.venv/
+.venv/
 scripts/
 ./scripts
 ./scripts/
@@ -18,3 +18,6 @@ app.log
 www.tiktok.com_cookies.txt
 tiktok_matrix_cookies.txt
 temp_audio.mp3 
+backend\.venv
+
+./backend/.venv
