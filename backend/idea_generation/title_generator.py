@@ -1,8 +1,8 @@
+# idea_generation/title_generator.py
 import openai
 import os
+from flask import request, jsonify
 from dotenv import load_dotenv
-from idea_generator import choose_best_idea
-
 
 # Cargar variables de entorno
 load_dotenv()
@@ -18,11 +18,12 @@ def generate_title(idea):
 
     return response.choices[0].text.strip()
 
-# ... mismo código en title_generator.py
-
-"""
-# Generar título para la mejor idea
-best_title = generate_title(choose_best_idea)
-print(best_title)
-
-"""
+def setup_routes(app):
+    @app.route('/generate_title', methods=['POST'])
+    def generate_video_title():
+        data = request.json
+        idea = data.get('idea')
+        if not idea:
+            return jsonify({"error": "No idea provided"}), 400
+        title = generate_title(idea)
+        return jsonify({"title": title})
