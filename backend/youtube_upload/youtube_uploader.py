@@ -70,7 +70,7 @@ def upload_video_to_youtube(video_file_path, title, description, category_id, ke
         upload_thumbnail(youtube, video_id, thumbnail_file_path)
 
 
-output_video_path="../videos/Exploring_a_Haunted_House_Thrilling_Scares_&_Chilling_Secrets_6078239f-0bfb-401f-9b67-f4a3ba0811ed.mp4"
+output_video_path="./videos/Exploring_a_Haunted_House_Thrilling_Scares_&_Chilling_Secrets_6078239f-0bfb-401f-9b67-f4a3ba0811ed.mp4"
 video_title="TEST"
 
 # # Ejemplo de uso

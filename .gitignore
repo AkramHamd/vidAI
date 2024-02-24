@@ -19,5 +19,5 @@ www.tiktok.com_cookies.txt
 tiktok_matrix_cookies.txt
 temp_audio.mp3 
 backend\.venv
-
+*.zip
 ./backend/.venv
